@@ -2,9 +2,11 @@ lockfileVersion: 5.4
 
 specifiers:
   commander: ^11.1.0
+  dios-cli: ^1.0.0
 
 dependencies:
   commander: registry.npmmirror.com/commander/11.1.0
+  dios-cli: registry.npmmirror.com/dios-cli/1.0.0
 
 packages:
 
@@ -13,4 +15,13 @@ packages:
     name: commander
     version: 11.1.0
     engines: {node: '>=16'}
+    dev: false
+
+  registry.npmmirror.com/dios-cli/1.0.0:
+    resolution: {integrity: sha512-BnQSzCXOF2nZvlFTCg/8igTg8nnQtCEDhI5qX1X/tDBRauV1erjJEVIMB8lxl1x3b7Xs/D3qFVrXpffWAihK4w==, registry: https://registry.npm.taobao.org/, tarball: https://registry.npmmirror.com/dios-cli/-/dios-cli-1.0.0.tgz}
+    name: dios-cli
+    version: 1.0.0
+    hasBin: true
+    dependencies:
+      commander: registry.npmmirror.com/commander/11.1.0
     dev: false
