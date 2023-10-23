@@ -1,13 +1,17 @@
 {
-  "name": "create-dios",
-  "version": "1.0.3",
+  "name": "create-dios-cli",
+  "version": "0.0.3",
   "description": "自定义cli脚手架",
-  "main": "index.ts",
   "bin": {
-    "create-dios": "index.ts"
+    "create-dios-cli": "outfile.cjs"
   },
+  "files": [
+    "outfile.cjs",
+    "template"
+  ],
   "scripts": {
     "dios": "ts-node index.ts",
+    "build": "zx ./scripts/build.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

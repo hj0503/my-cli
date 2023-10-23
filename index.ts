@@ -67,9 +67,7 @@ async function init() {
   let targetDir = argv._[0]
   const defaultProjectName = !targetDir ? 'vue-project' : targetDir
 
-  const forceOverwrite = argv // 是否强制覆盖
-
-  console.log('1111', argv, targetDir)
+  const forceOverwrite = argv.force // 是否强制覆盖
 
   let result: {
     projectName?: string
@@ -126,7 +124,7 @@ async function init() {
     fs.mkdirSync(root)
   }
   // 一句提示, 脚手架项目在xxx目录
-  console.log(`\nScaffolding project in ${root}...`)
+  console.log(`project in ${root}...`)
 
   // 计算模板所在文件加路径
   const templateRoot = path.resolve(__dirname, 'template')
