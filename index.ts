@@ -7,8 +7,12 @@ import * as ejs from 'ejs'
 
 import minimist from 'minimist'
 import prompts from 'prompts'
+import { green, bold } from 'kolorist'
+
 import { postOrderDirectoryTraverse, preOrderDirectoryTraverse } from './utils/directoryTraverse'
 import renderTemplate from './utils/renderTemplate'
+import getCommand from './utils/getCommand'
+import { TemplateName } from './config/template'
 
 function isValidPackageName(projectName: string) {
   return /^(?:@[a-z0-9-*~][a-z0-9-*._~]*\/)?[a-z0-9-~][a-z0-9-._~]*$/.test(projectName)
@@ -68,10 +72,13 @@ async function init() {
 
   let targetDir = argv._[0]
   const defaultProjectName = !targetDir ? 'vue-project' : targetDir
+  const isVue3 = argv.vue3
+  const isVue2 = argv.vue2
 
   const forceOverwrite = argv.force // 是否强制覆盖
 
   let result: {
+    templateName?: TemplateName
     projectName?: string
     packageName?: string
     shouldOverwrite?: boolean
@@ -79,6 +86,22 @@ async function init() {
 
   try {
     result = await prompts([
+      {
+        name: 'templateName',
+        type: () => (isVue3 || isVue2 ? null : 'select'),
+        message: '请选择模版类型',
+        initial: 0,
+        choices: [
+          {
+            title: TemplateName.Vue3,
+            value: TemplateName.Vue3
+          },
+          {
+            title: TemplateName.Vue2,
+            value: TemplateName.Vue2
+          },
+        ]
+      },
       {
         name: 'projectName',
         type: targetDir ? null : 'text',
@@ -114,7 +137,12 @@ async function init() {
     process.exit(1)
   }
 
-  const { projectName, shouldOverwrite, packageName = projectName ?? defaultProjectName, } = result
+  const {
+    templateName = isVue3 ? TemplateName.Vue3 : TemplateName.Vue2,
+    projectName, shouldOverwrite,
+    packageName = projectName ?? defaultProjectName,
+  } = result
+  const ejsData = { ...result, packageName }
 
   const root = path.join(cwd, targetDir) // 计算目标文件夹的完整文件路径
 
@@ -126,22 +154,27 @@ async function init() {
     fs.mkdirSync(root)
   }
   // 一句提示, 脚手架项目在xxx目录
-  console.log(`project in ${root}...`)
+  console.log(`\n正在构建项目 ${root}...`)
 
   // 计算模板所在文件加路径
   const templateRoot = path.resolve(__dirname, 'template')
+  const callbacks: ((dataStore: any) => Promise<void>)[] = []
   // 定义模板渲染 render 方法，参数为模板名
   const render = function render(templateName: string) {
     const templateDir = path.resolve(templateRoot, templateName)
     // 核心是这个 renderTemplate 方法，第一个参数是源文件夹目录，第二个参数是目标文件夹目录
-    console.log('tttttt', templateDir)
-    renderTemplate(templateDir, root)
+    renderTemplate(templateDir, root, callbacks)
   }
 
-  render('vue3')
+  render(templateName)
 
   // An external data store for callbacks to share data
   const dataStore = {}
+  // Process callbacks
+  for (const cb of callbacks) {
+    await cb(dataStore)
+  }
+
   // EJS template rendering
   preOrderDirectoryTraverse(
     root,
@@ -150,13 +183,26 @@ async function init() {
       if (filepath.endsWith('.ejs')) {
         const template = fs.readFileSync(filepath, 'utf-8')
         const dest = filepath.replace(/\.ejs$/, '')
-        const content = ejs.render(template, { packageName: 'ha' })
+        const content = ejs.render(template, { ...(dataStore[dest] || {}), ...ejsData })
 
         fs.writeFileSync(dest, content)
         fs.unlinkSync(filepath)
       }
     }
   )
+
+  const userAgent = process.env.npm_config_user_agent ?? ''
+  const packageManager = /pnpm/.test(userAgent) ? 'pnpm' : /yarn/.test(userAgent) ? 'yarn' : 'npm'
+  console.log(`\n项目构建完成，可执行以下命令：\n`)
+  if (root !== cwd) {
+    const cdProjectName = path.relative(cwd, root)
+    console.log(
+      `  ${bold(green(`cd ${cdProjectName.includes(' ') ? `"${cdProjectName}"` : cdProjectName}`))}`
+    )
+  }
+  console.log(`  ${bold(green(getCommand(packageManager, 'install')))}`)
+  console.log(`  ${bold(green(getCommand(packageManager, 'dev')))}`)
+  console.log()
 }
 
 init().catch((e) => {
