@@ -3,9 +3,11 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 
+import * as ejs from 'ejs'
+
 import minimist from 'minimist'
 import prompts from 'prompts'
-import { postOrderDirectoryTraverse } from './utils/directoryTraverse'
+import { postOrderDirectoryTraverse, preOrderDirectoryTraverse } from './utils/directoryTraverse'
 import renderTemplate from './utils/renderTemplate'
 
 function isValidPackageName(projectName: string) {
@@ -132,10 +134,29 @@ async function init() {
   const render = function render(templateName: string) {
     const templateDir = path.resolve(templateRoot, templateName)
     // 核心是这个 renderTemplate 方法，第一个参数是源文件夹目录，第二个参数是目标文件夹目录
+    console.log('tttttt', templateDir)
     renderTemplate(templateDir, root)
   }
 
   render('vue3')
+
+  // An external data store for callbacks to share data
+  const dataStore = {}
+  // EJS template rendering
+  preOrderDirectoryTraverse(
+    root,
+    () => { },
+    (filepath) => {
+      if (filepath.endsWith('.ejs')) {
+        const template = fs.readFileSync(filepath, 'utf-8')
+        const dest = filepath.replace(/\.ejs$/, '')
+        const content = ejs.render(template, { packageName: 'ha' })
+
+        fs.writeFileSync(dest, content)
+        fs.unlinkSync(filepath)
+      }
+    }
+  )
 }
 
 init().catch((e) => {

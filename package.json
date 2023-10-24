@@ -10,7 +10,7 @@
     "template"
   ],
   "scripts": {
-    "dios": "ts-node index.ts",
+    "dios": "esno index.ts",
     "build": "zx ./scripts/build.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
