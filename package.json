@@ -1,6 +1,6 @@
 {
   "name": "create-dios-cli",
-  "version": "0.0.6",
+  "version": "0.0.10",
   "description": "自定义cli脚手架",
   "bin": {
     "create-dios-cli": "outfile.cjs"
@@ -16,14 +16,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/hj0503/my-cli.git"
+    "url": "git+https://xxx/my-cli.git"
   },
   "author": "hj",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/hj0503/my-cli/issues"
+    "url": "https://xxx/my-cli/issues"
   },
-  "homepage": "https://github.com/hj0503/my-cli#readme",
+  "homepage": "https://xxx/my-cli#readme",
   "devDependencies": {
     "@tsconfig/node18": "^18.2.2",
     "@types/eslint": "^8.44.4",
@@ -34,6 +34,7 @@
     "ejs": "^3.1.9",
     "esbuild": "^0.18.20",
     "esbuild-plugin-license": "^1.2.2",
+    "esno": "^0.17.0",
     "husky": "^8.0.3",
     "kolorist": "^1.8.0",
     "lint-staged": "^15.0.1",
